@@ -1,0 +1,25 @@
+# Deny all direct access to storage directory
+# This prevents users from directly accessing uploaded files, logs, and other sensitive data
+# Files should only be accessible through Laravel routes with proper authorization
+
+<Files "*">
+    Order Deny,Allow
+    Deny from all
+</Files>
+
+# Alternative syntax for Apache 2.4+
+<RequireAll>
+    Require all denied
+</RequireAll>
+
+# Block common file extensions that should never be directly accessible
+<FilesMatch "\.(log|env|cache|session|tmp)$">
+    Order Deny,Allow
+    Deny from all
+</FilesMatch>
+
+# Prevent directory browsing
+Options -Indexes
+
+# Disable server signature
+ServerSignature Off

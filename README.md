@@ -1,11 +1,102 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# CES Site
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+A Laravel-based e-commerce and content management system with role-based admin access.
+
+## Features
+
+- **E-commerce**: Product catalog, shopping cart, order management
+- **Content Management**: Blog posts, file management
+- **User Management**: Registration, authentication, email verification
+- **Admin System**: Role-based access control with admin dashboard
+- **Responsive Design**: Modern UI with Tailwind CSS
+
+## Quick Start
+
+### Prerequisites
+
+- PHP 8.1+
+- Composer
+- Node.js & NPM
+- MySQL/PostgreSQL or SQLite for development
+
+### Installation
+
+1. **Clone and install dependencies:**
+   ```bash
+   git clone <repository-url> ces_site
+   cd ces_site
+   composer install
+   npm install
+   ```
+
+2. **Environment setup:**
+   ```bash
+   cp .env.example .env
+   php artisan key:generate
+   ```
+
+3. **Database setup:**
+   ```bash
+   # Configure your database in .env, then:
+   php artisan migrate
+   php artisan db:seed
+   ```
+
+4. **Build assets:**
+   ```bash
+   npm run build
+   # Or for development:
+   npm run dev
+   ```
+
+5. **Start the application:**
+   ```bash
+   php artisan serve
+   ```
+
+   Visit: http://localhost:8000
+
+### Admin Setup
+
+1. **Seed roles:**
+   ```bash
+   php artisan db:seed --class=RoleSeeder
+   ```
+
+2. **Promote a user to admin:**
+   ```bash
+   php artisan user:promote admin@example.com admin
+   ```
+
+3. **Access admin panel:**
+   - Login with admin user
+   - Navigate to `/admin`
+
+## Development
+
+### Running Tests
+```bash
+# All tests
+php artisan test
+
+# Specific test suites
+php artisan test tests/Feature/
+php artisan test tests/Unit/
+```
+
+### Code Quality
+```bash
+# Run PHP CS Fixer (if configured)
+./vendor/bin/php-cs-fixer fix
+
+# Run PHPStan (if configured)
+./vendor/bin/phpstan analyse
+```
+
+## Documentation
+
+- [Admin Guide](docs/ADMIN_GUIDE.md) - Role management and admin features
+- [API Documentation](docs/API.md) - API endpoints (if applicable)
 
 ## About Laravel
 
