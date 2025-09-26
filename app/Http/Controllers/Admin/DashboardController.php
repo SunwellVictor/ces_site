@@ -41,7 +41,7 @@ class DashboardController extends Controller
         ];
 
         // Get recent activity
-        $recent_orders = Order::with(['user', 'items.product'])
+        $recent_orders = Order::with(['user', 'orderItems.product'])
                              ->latest()
                              ->limit(5)
                              ->get();
@@ -51,7 +51,7 @@ class DashboardController extends Controller
                            ->limit(5)
                            ->get();
 
-        $recent_posts = Post::with('user')
+        $recent_posts = Post::with('author')
                            ->latest()
                            ->limit(5)
                            ->get();
