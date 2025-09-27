@@ -56,6 +56,7 @@ class StripeWebhookTest extends TestCase
         Mail::fake();
 
         $payload = [
+            'id' => 'evt_test_checkout_123',
             'type' => 'checkout.session.completed',
             'data' => [
                 'object' => [
@@ -95,6 +96,7 @@ class StripeWebhookTest extends TestCase
         Mail::fake();
 
         $payload = [
+            'id' => 'evt_test_payment_123',
             'type' => 'payment_intent.succeeded',
             'data' => [
                 'object' => [
@@ -131,6 +133,7 @@ class StripeWebhookTest extends TestCase
     public function test_payment_intent_payment_failed_webhook_updates_order_status()
     {
         $payload = [
+            'id' => 'evt_test_failed_123',
             'type' => 'payment_intent.payment_failed',
             'data' => [
                 'object' => [
@@ -160,6 +163,7 @@ class StripeWebhookTest extends TestCase
     public function test_webhook_with_invalid_signature_is_rejected()
     {
         $payload = [
+            'id' => 'evt_test_grants_123',
             'type' => 'checkout.session.completed',
             'data' => [
                 'object' => [
@@ -184,6 +188,7 @@ class StripeWebhookTest extends TestCase
     public function test_webhook_for_nonexistent_order_is_handled_gracefully()
     {
         $payload = [
+            'id' => 'evt_test_nonexistent_123',
             'type' => 'checkout.session.completed',
             'data' => [
                 'object' => [
@@ -206,6 +211,7 @@ class StripeWebhookTest extends TestCase
         Mail::fake();
 
         $payload = [
+            'id' => 'evt_test_duplicate_123',
             'type' => 'checkout.session.completed',
             'data' => [
                 'object' => [
@@ -246,6 +252,7 @@ class StripeWebhookTest extends TestCase
         $this->product->files()->attach($secondFile);
 
         $payload = [
+            'id' => 'evt_test_multiple_files_123',
             'type' => 'checkout.session.completed',
             'data' => [
                 'object' => [
