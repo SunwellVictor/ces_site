@@ -148,8 +148,8 @@ class CheckoutController extends Controller
                 return redirect()->route('home')->with('error', 'Order not found.');
             }
             
-            // If order is already paid (e.g., in tests), just show success page
-            if ($order->status === 'paid' || $order->payment_status === 'paid') {
+            // If order is already paid, immediately return success page (idempotent)
+            if ($order->status === 'paid') {
                 // Clear the cart
                 CartService::clear();
                 return view('checkout.success', compact('order'));
@@ -162,14 +162,14 @@ class CheckoutController extends Controller
                 
                 if ($stripeSession->payment_status === 'paid') {
                     DB::transaction(function () use ($order) {
-                        // Update order status
+                        // Update order status to 'paid' (consistent with webhooks)
                         $order->update([
-                            'status' => 'completed',
-                            'payment_status' => 'paid',
+                            'status' => 'paid',
+                            'stripe_payment_intent' => $stripeSession->payment_intent ?? null,
                             'paid_at' => now(),
                         ]);
 
-                        // Create download grants for all files in the order
+                        // Create download grants for all files in the order (idempotent)
                         GrantService::createForOrder($order);
 
                         // Send order receipt email

@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Webhook;
 
 use App\Http\Controllers\Controller;
 use App\Models\Order;
-use App\Models\DownloadGrant;
+use App\Models\OrderItem;
+use App\Models\StripeEvent;
 use App\Services\GrantService;
 use App\Mail\OrderReceipt;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Stripe\Webhook;
@@ -38,11 +38,23 @@ class StripeController extends Controller
             return response('Invalid signature', 400);
         }
 
+        // Check if this event has already been processed (deduplication)
+        if (StripeEvent::isProcessed($event['id'])) {
+            Log::info('Stripe webhook: Event already processed, skipping', [
+                'type' => $event['type'],
+                'id' => $event['id']
+            ]);
+            return response('Event already processed', 200);
+        }
+
         // Log the webhook event
         Log::info('Stripe webhook received', [
             'type' => $event['type'],
             'id' => $event['id']
         ]);
+
+        // Mark event as processed before handling to prevent race conditions
+        StripeEvent::markAsProcessed($event['id'], $event['type'], $event['data']->toArray());
 
         // Handle the event
         switch ($event['type']) {
@@ -100,20 +112,27 @@ class StripeController extends Controller
             return;
         }
 
-        // Update order status to paid (idempotent)
+        // Early return if order is already paid (idempotent)
+        if ($order->status === 'paid') {
+            Log::info('Stripe webhook: Order already paid, skipping', [
+                'order_id' => $order->id,
+                'session_id' => $sessionId
+            ]);
+            return;
+        }
+
+        // Update order status to paid
         $order->update([
             'status' => 'paid',
             'stripe_payment_intent' => $session['payment_intent'] ?? null,
-            'paid_at' => $order->paid_at ?? now(),
+            'paid_at' => now(),
         ]);
 
-        // Create download grants for digital products (only if not already created)
-        if ($order->downloadGrants()->count() === 0) {
-            GrantService::createForOrder($order);
-            
-            // Send order receipt email
-            Mail::to($order->user->email)->send(new OrderReceipt($order));
-        }
+        // Create download grants for digital products
+        GrantService::createForOrder($order);
+        
+        // Send order receipt email
+        Mail::to($order->user->email)->send(new OrderReceipt($order));
 
         Log::info('Stripe webhook: Checkout session completed', [
             'order_id' => $order->id,
@@ -136,21 +155,26 @@ class StripeController extends Controller
             return;
         }
 
-        // Ensure order is marked as paid
-        if ($order->status !== 'paid') {
-            $order->update([
-                'status' => 'paid',
-                'paid_at' => now(),
+        // Early return if order is already paid (idempotent)
+        if ($order->status === 'paid') {
+            Log::info('Stripe webhook: Order already paid, skipping', [
+                'order_id' => $order->id,
+                'payment_intent_id' => $paymentIntentId
             ]);
-
-            // Create download grants for digital products (only if not already created)
-            if ($order->downloadGrants()->count() === 0) {
-                GrantService::createForOrder($order);
-                
-                // Send order receipt email
-                Mail::to($order->user->email)->send(new OrderReceipt($order));
-            }
+            return;
         }
+
+        // Update order status to paid
+        $order->update([
+            'status' => 'paid',
+            'paid_at' => now(),
+        ]);
+
+        // Create download grants for digital products
+        GrantService::createForOrder($order);
+        
+        // Send order receipt email
+        Mail::to($order->user->email)->send(new OrderReceipt($order));
 
         Log::info('Stripe webhook: Payment intent succeeded', [
             'order_id' => $order->id,
