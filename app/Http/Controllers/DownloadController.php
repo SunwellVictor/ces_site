@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Str;
 
 class DownloadController extends Controller
@@ -42,11 +43,23 @@ class DownloadController extends Controller
      */
     public function issueToken(Request $request, DownloadGrant $grant)
     {
-        $user = Auth::user();
+        // Rate limiting: 5 requests per minute per user
+        $key = 'download-token:' . Auth::id();
+        if (RateLimiter::tooManyAttempts($key, 5)) {
+            $seconds = RateLimiter::availableIn($key);
+            return response()->json([
+                'error' => 'Too many requests. Please try again later.',
+                'retry_after' => $seconds
+            ], 429);
+        }
+
+        RateLimiter::hit($key, 60); // 60 seconds = 1 minute
 
         // Verify the grant belongs to the authenticated user
-        if ($grant->user_id !== $user->id) {
-            abort(403, 'Unauthorized access to download grant.');
+        if ($grant->user_id !== Auth::id()) {
+            return response()->json([
+                'error' => 'Unauthorized access to this grant'
+            ], 403);
         }
 
         // Check if the grant is still valid

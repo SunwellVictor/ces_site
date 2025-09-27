@@ -74,7 +74,11 @@ class PostController extends Controller
             ->where('status', 'published')
             ->where('published_at', '<=', now())
             ->with(['author', 'categories'])
-            ->firstOrFail();
+            ->first();
+            
+        if (!$post) {
+            abort(404);
+        }
 
         // Set meta for individual post using SEO fields or fallbacks
         $title = $post->seo_title ?: $post->title;

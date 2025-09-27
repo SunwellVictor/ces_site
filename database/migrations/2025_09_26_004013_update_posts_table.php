@@ -24,7 +24,8 @@ return new class extends Migration
                 'metadata',
                 'views_count',
                 'is_featured',
-                'allow_comments'
+                'allow_comments',
+                'content'
             ]);
             
             // Add new columns for Phase 1 spec
@@ -47,13 +48,14 @@ return new class extends Migration
         Schema::table('posts', function (Blueprint $table) {
             // Drop Phase 1 indexes
             $table->dropIndex(['author_id', 'status']);
-            $table->dropIndex(['posts_published_at_index']);
+            $table->dropIndex(['published_at']);
             
             // Remove Phase 1 columns
             $table->dropColumn(['body', 'seo_title', 'seo_description']);
             
             // Restore previously removed columns (only ones that existed)
             $table->string('type')->default('post')->after('status');
+            $table->text('content')->after('excerpt');
             $table->json('categories')->nullable()->after('author_id');
             $table->json('tags')->nullable()->after('categories');
             $table->json('metadata')->nullable()->after('tags');

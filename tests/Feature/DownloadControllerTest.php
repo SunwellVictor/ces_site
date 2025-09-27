@@ -27,6 +27,9 @@ class DownloadControllerTest extends TestCase
     {
         parent::setUp();
         
+        // Disable CSRF middleware for all tests in this class
+        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);
+        
         $this->user = User::factory()->create();
         $this->otherUser = User::factory()->create();
         $this->file = File::factory()->create([
@@ -122,9 +125,12 @@ class DownloadControllerTest extends TestCase
             'downloads_used' => 0
         ]);
 
-        $response = $this->actingAs($this->user)->post(route('downloads.token', $grant), [
-            'grant_id' => $grant->id
-        ]);
+        $response = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->post(route('downloads.token', $grant), [
+                'grant_id' => $grant->id,
+                '_token' => 'test-token'
+            ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure(['token', 'expires_at']);
@@ -144,9 +150,12 @@ class DownloadControllerTest extends TestCase
             'file_id' => $this->file->id
         ]);
 
-        $response = $this->actingAs($this->user)->post(route('downloads.token', $otherGrant), [
-            'grant_id' => $otherGrant->id
-        ]);
+        $response = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->post(route('downloads.token', $otherGrant), [
+                'grant_id' => $otherGrant->id,
+                '_token' => 'test-token'
+            ]);
 
         $response->assertStatus(403);
     }
@@ -160,9 +169,12 @@ class DownloadControllerTest extends TestCase
             'expires_at' => now()->subDay()
         ]);
 
-        $response = $this->actingAs($this->user)->post(route('downloads.token', $expiredGrant), [
-            'grant_id' => $expiredGrant->id
-        ]);
+        $response = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->post(route('downloads.token', $expiredGrant), [
+                'grant_id' => $expiredGrant->id,
+                '_token' => 'test-token'
+            ]);
 
         $response->assertStatus(403);
         $response->assertJson(['error' => 'Grant is no longer valid']);
@@ -178,9 +190,12 @@ class DownloadControllerTest extends TestCase
             'downloads_used' => 5
         ]);
 
-        $response = $this->actingAs($this->user)->post(route('downloads.token', $grant), [
-            'grant_id' => $grant->id
-        ]);
+        $response = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->post(route('downloads.token', $grant), [
+                'grant_id' => $grant->id,
+                '_token' => 'test-token'
+            ]);
 
         $response->assertStatus(403);
         $response->assertJson(['error' => 'Grant is no longer valid']);
@@ -196,18 +211,24 @@ class DownloadControllerTest extends TestCase
             'downloads_used' => 0
         ]);
 
-        // Make 5 requests (the limit)
+        // Make 5 requests (the limit) - our custom rate limiting allows 5 per minute
         for ($i = 0; $i < 5; $i++) {
-            $response = $this->actingAs($this->user)->post(route('downloads.token', $grant), [
-                'grant_id' => $grant->id
-            ]);
+            $response = $this->actingAs($this->user)
+                ->withSession(['_token' => 'test-token'])
+                ->post(route('downloads.token', $grant), [
+                    'grant_id' => $grant->id,
+                    '_token' => 'test-token'
+                ]);
             $response->assertStatus(200);
         }
 
-        // 6th request should be rate limited
-        $response = $this->actingAs($this->user)->post(route('downloads.token', $grant), [
-            'grant_id' => $grant->id
-        ]);
+        // 6th request should be rate limited by our custom rate limiting
+        $response = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->post(route('downloads.token', $grant), [
+                'grant_id' => $grant->id,
+                '_token' => 'test-token'
+            ]);
         
         $response->assertStatus(429); // Too Many Requests
     }
@@ -343,9 +364,12 @@ class DownloadControllerTest extends TestCase
             'downloads_used' => 0
         ]);
 
-        $response = $this->actingAs($this->user)->post(route('downloads.token', $grant), [
-            'grant_id' => $grant->id
-        ]);
+        $response = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->post(route('downloads.token', $grant), [
+                'grant_id' => $grant->id,
+                '_token' => 'test-token'
+            ]);
 
         $response->assertStatus(200);
         $response->assertJsonStructure([

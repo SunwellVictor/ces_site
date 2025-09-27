@@ -159,7 +159,7 @@ class AccountTest extends TestCase
         $response = $this->actingAs($this->user)->get(route('account.orders.show', $order));
         
         $response->assertStatus(200);
-        $response->assertViewIs('account.order-detail');
+        $response->assertViewIs('account.order-show');
         $response->assertViewHas('order');
         $response->assertSee('#' . $order->id);
     }
@@ -205,10 +205,13 @@ class AccountTest extends TestCase
         $newName = 'Updated Name';
         $newEmail = 'updated@example.com';
 
-        $response = $this->actingAs($this->user)->patch(route('account.profile.update'), [
-            'name' => $newName,
-            'email' => $newEmail
-        ]);
+        $response = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->patch(route('account.profile.update'), [
+                'name' => $newName,
+                'email' => $newEmail,
+                '_token' => 'test-token'
+            ]);
 
         $response->assertRedirect(route('account.profile.edit'));
         $response->assertSessionHas('status', 'profile-updated');
@@ -220,38 +223,41 @@ class AccountTest extends TestCase
 
     public function test_profile_update_validation_works()
     {
-        $response = $this->actingAs($this->user)->patch(route('account.profile.update'), [
-            'name' => '', // Required field
-            'email' => 'invalid-email' // Invalid email
-        ]);
+        $response = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->patch(route('account.profile.update'), [
+                'name' => '', // Required field
+                'email' => 'invalid-email', // Invalid email
+                '_token' => 'test-token'
+            ]);
 
         $response->assertSessionHasErrors(['name', 'email']);
     }
 
     public function test_profile_update_prevents_duplicate_email()
     {
-        $response = $this->actingAs($this->user)->patch(route('account.profile.update'), [
-            'name' => 'Test Name',
-            'email' => $this->otherUser->email // Email already taken
-        ]);
+        $response = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->patch(route('account.profile.update'), [
+                'name' => 'Test Name',
+                'email' => $this->otherUser->email, // Email already taken
+                '_token' => 'test-token'
+            ]);
 
         $response->assertSessionHasErrors(['email']);
     }
 
     public function test_csrf_protection_on_profile_update()
     {
-        // Test that CSRF protection is working by making a request without proper CSRF token
-        // Laravel's test environment automatically includes CSRF tokens, so we need to disable it
-        $this->withoutMiddleware(\Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class);
-        
+        // Test that CSRF protection is working by making a request without CSRF token
         $response = $this->actingAs($this->user)->patch(route('account.profile.update'), [
             'name' => 'Test Name',
             'email' => 'test@example.com'
+            // No _token field - should trigger CSRF error
         ]);
 
-        // Without CSRF middleware, request should succeed
-        $response->assertRedirect(route('account.profile.edit'));
-        $response->assertSessionHas('status', 'profile-updated');
+        // Should receive 419 CSRF error
+        $response->assertStatus(419);
     }
 
     public function test_account_routes_require_authentication()

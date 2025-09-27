@@ -100,7 +100,7 @@ class AccountController extends Controller
 
         $order->load(['orderItems.product', 'downloadGrants.product']);
 
-        return view('account.order-detail', compact('order'));
+        return view('account.order-show', compact('order'));
     }
 
     /**

@@ -36,7 +36,6 @@ class PostFactory extends Factory
             'title' => rtrim($title, '.'),
             'slug' => Str::slug($title),
             'excerpt' => fake()->optional(0.8)->paragraph(rand(1, 2)),
-            'content' => $content,
             'body' => $content,
             'status' => $isPublished ? 'published' : 'draft',
             'published_at' => $isPublished ? fake()->dateTimeBetween($createdAt, 'now') : null,

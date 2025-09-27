@@ -54,7 +54,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/downloads', [DownloadController::class, 'index'])->name('downloads.index');
     Route::post('/downloads/{grant}/token', [DownloadController::class, 'issueToken'])
-        ->middleware('throttle:5,1') // 5 requests per minute per user
         ->name('downloads.token');
     Route::get('/downloads/stats', [DownloadController::class, 'getDownloadStats'])->name('downloads.stats');
     Route::get('/downloads/grants/{grant}/status', [DownloadController::class, 'checkGrantStatus'])->name('downloads.grant.status');

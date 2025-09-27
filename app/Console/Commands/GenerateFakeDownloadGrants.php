@@ -18,74 +18,76 @@ class GenerateFakeDownloadGrants extends Command
      * @var string
      */
     protected $signature = 'grant:fake 
-                            {--count=10 : Number of grants to create}
-                            {--user= : Specific user ID to create grants for}
-                            {--expired : Create some expired grants}
-                            {--used : Create some fully used grants}
-                            {--clear : Clear existing fake grants first}';
+                            {email : User email to grant access to}
+                            {product_slug : Product slug to grant access to}
+                            {--downloads=5 : Number of downloads allowed}
+                            {--expires="+2 years" : Expiration time (relative format)}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Generate fake download grants for testing purposes';
+    protected $description = 'Grant fake download access to a user for a specific product';
 
     /**
      * Execute the console command.
      */
     public function handle()
     {
-        $count = (int) $this->option('count');
-        $userId = $this->option('user');
-        $includeExpired = $this->option('expired');
-        $includeUsed = $this->option('used');
-        $clear = $this->option('clear');
+        $email = $this->argument('email');
+        $productSlug = $this->argument('product_slug');
+        $downloads = (int) $this->option('downloads');
+        $expires = $this->option('expires');
 
-        if ($clear) {
-            $this->info('Clearing existing fake grants...');
-            DownloadGrant::whereNull('order_id')->delete();
-            $this->info('Cleared existing fake grants.');
-        }
-
-        // Check if we have the required data
-        $users = User::all();
-        $products = Product::with('files')->get();
-        $files = File::all();
-
-        if ($users->isEmpty()) {
-            $this->error('No users found. Please create some users first.');
+        // Find the user
+        $user = User::where('email', $email)->first();
+        if (!$user) {
+            $this->error("User with email '{$email}' not found.");
             return 1;
         }
 
-        if ($products->isEmpty() || $files->isEmpty()) {
-            $this->error('No products or files found. Please create some products and files first.');
+        // Find the product
+        $product = Product::where('slug', $productSlug)->first();
+        if (!$product) {
+            $this->error("Product with slug '{$productSlug}' not found.");
             return 1;
         }
 
-        $this->info("Generating {$count} fake download grants...");
+        // Get product files
+        $files = $product->files;
+        if ($files->isEmpty()) {
+            $this->error("Product '{$productSlug}' has no files attached.");
+            return 1;
+        }
 
-        $bar = $this->output->createProgressBar($count);
-        $bar->start();
+        // Parse expiration date
+        $expiresAt = null;
+        if ($expires) {
+            try {
+                $expiresAt = new \DateTime($expires);
+            } catch (\Exception $e) {
+                $this->error("Invalid expiration format: {$expires}");
+                return 1;
+            }
+        }
 
-        DB::transaction(function () use ($count, $userId, $includeExpired, $includeUsed, $users, $products, $files, $bar) {
-            for ($i = 0; $i < $count; $i++) {
-                $user = $userId ? User::find($userId) : $users->random();
-                $product = $products->random();
-                $file = $product->files->isNotEmpty() ? $product->files->random() : $files->random();
+        $this->info("Creating download grants for user '{$email}' and product '{$productSlug}'...");
 
-                $maxDownloads = rand(1, 10);
-                $downloadsUsed = 0;
-                $expiresAt = now()->addDays(rand(7, 90));
+        $createdCount = 0;
 
-                // Create some expired grants if requested
-                if ($includeExpired && rand(1, 4) === 1) {
-                    $expiresAt = now()->subDays(rand(1, 30));
-                }
+        DB::transaction(function () use ($user, $product, $files, $downloads, $expiresAt, &$createdCount) {
+            foreach ($files as $file) {
+                // Check if grant already exists for this user/product/file combination
+                $existingGrant = DownloadGrant::where('user_id', $user->id)
+                    ->where('product_id', $product->id)
+                    ->where('file_id', $file->id)
+                    ->whereNull('order_id') // Only check fake grants
+                    ->first();
 
-                // Create some fully used grants if requested
-                if ($includeUsed && rand(1, 4) === 1) {
-                    $downloadsUsed = $maxDownloads;
+                if ($existingGrant) {
+                    $this->warn("Grant already exists for file: {$file->filename}");
+                    continue;
                 }
 
                 DownloadGrant::create([
@@ -93,44 +95,27 @@ class GenerateFakeDownloadGrants extends Command
                     'product_id' => $product->id,
                     'file_id' => $file->id,
                     'order_id' => null, // Fake grants don't have orders
-                    'max_downloads' => $maxDownloads,
-                    'downloads_used' => $downloadsUsed,
+                    'max_downloads' => $downloads,
+                    'downloads_used' => 0,
                     'expires_at' => $expiresAt,
                 ]);
 
-                $bar->advance();
+                $createdCount++;
+                $this->info("✓ Created grant for file: {$file->filename}");
             }
         });
 
-        $bar->finish();
-        $this->newLine();
-
-        // Show summary
-        $totalGrants = DownloadGrant::count();
-        $validGrants = DownloadGrant::whereNull('order_id')
-            ->where('expires_at', '>', now())
-            ->whereColumn('downloads_used', '<', 'max_downloads')
-            ->count();
-        $expiredGrants = DownloadGrant::whereNull('order_id')
-            ->where('expires_at', '<=', now())
-            ->count();
-        $usedUpGrants = DownloadGrant::whereNull('order_id')
-            ->whereColumn('downloads_used', '>=', 'max_downloads')
-            ->count();
-
-        $this->info("✅ Successfully created {$count} fake download grants!");
-        $this->table(
-            ['Type', 'Count'],
-            [
-                ['Total Grants', $totalGrants],
-                ['Valid Grants', $validGrants],
-                ['Expired Grants', $expiredGrants],
-                ['Used Up Grants', $usedUpGrants],
-            ]
-        );
-
-        $this->info('💡 You can now test the download system with these grants.');
-        $this->info('💡 Use "php artisan grant:fake --clear" to remove fake grants.');
+        if ($createdCount > 0) {
+            $this->info("✅ Successfully created {$createdCount} download grant(s) for user '{$email}' and product '{$productSlug}'!");
+            $this->info("📥 Downloads allowed: {$downloads}");
+            if ($expiresAt) {
+                $this->info("⏰ Expires: {$expiresAt->format('Y-m-d H:i:s')}");
+            } else {
+                $this->info("⏰ No expiration set");
+            }
+        } else {
+            $this->warn("No new grants were created (all grants already exist).");
+        }
 
         return 0;
     }
