@@ -97,6 +97,9 @@ php artisan test tests/Unit/
 
 - [Admin Guide](docs/ADMIN_GUIDE.md) - Role management and admin features
 - [API Documentation](docs/API.md) - API endpoints (if applicable)
+- [Stripe Integration](docs/STRIPE_NOTES.md) - Environment setup, test cards, webhook events, and replay
+- [Account Area](docs/ACCOUNT_AREA.md) - Dashboard, orders, downloads, ownership, and rate limits
+- [SEO Guide](docs/SEO_GUIDE.md) - Meta tags, schema markup, and Google validation
 
 ## About Laravel
 
