@@ -45,7 +45,10 @@ Clark English Learning (CEL) - A Laravel-based EFL teacher community site. Phase
 - 2025-01-27: ✅ SEO System Implementation completed - Comprehensive SEO baseline established: Dynamic robots.txt with proper disallow rules (/admin/, /cart, /checkout, /account, /download), removed static robots.txt file, fixed SeoGuard middleware to set noindex meta tags before response generation, added article meta tags support to Meta service (article:published_time, article:author), updated PostController for blog post article meta tags, verified sitemap system working (pages, posts, products), confirmed account/download pages have noindex,nofollow meta tags; all 15 SEO tests passing. Created PR `feat/seo-robots-sitemap-meta`.
 
 # Pending
-- 2025-01-27: Step 11 — Stripe Idempotency Hardening - Prevent duplicate grants/emails on repeated success page hits or webhook replays by adding early returns for paid orders, ensuring GrantService idempotency, optional stripe_events table for webhook deduplication, and comprehensive testing for replay scenarios
+- 2025-01-27: Step 12 — Owner Docs Completion - Create comprehensive documentation for operations: STRIPE_NOTES.md (env keys, events handled, test cards, webhook replay), ACCOUNT_AREA.md (pages, ownership checks, token limits), SEO_GUIDE.md (meta/schema setup, Google Rich Results validation), and update README with doc links
+
+# Progress
+- 2025-01-27: ✅ Step 11 — Stripe Idempotency Hardening completed - Comprehensive payment idempotency implementation finished: Added stripe_events table for webhook event deduplication with unique event_id constraint, improved CheckoutController success method with consistent status handling and early returns for paid orders, enhanced webhook handlers with early returns for already paid orders, created StripeEvent model with isProcessed/markAsProcessed methods, ensured GrantService idempotency using firstOrCreate, and implemented comprehensive test suite (StripeIdempotencyTest) covering success page idempotency, webhook deduplication, early returns, and grant service scenarios; all 6 tests passing with 31 assertions verified; PR created `fix/step-11-stripe-idempotency`
 
 # Phase 1 Project Status: ✅ COMPLETE & PRODUCTION READY
 
