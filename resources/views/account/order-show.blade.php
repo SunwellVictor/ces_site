@@ -60,7 +60,7 @@
 
                     <div>
                         <h3 class="text-lg font-semibold text-gray-800 mb-2">Order Total</h3>
-                        <div class="text-3xl font-bold text-gray-900">{{ format_yen($order->total_cents) }}</div>
+                        <div class="text-3xl font-bold text-gray-900">{{ currency($order->total_cents) }}</div>
                         @if($order->status === 'completed')
                             <p class="text-sm text-green-600 mt-1">✓ Payment completed</p>
                         @elseif($order->status === 'pending')
@@ -107,10 +107,10 @@
                                         {{ $item->quantity }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                                        {{ format_yen($item->unit_price_cents) }}
+                                        {{ currency($item->unit_price_cents) }}
                                     </td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                        {{ format_yen($item->quantity * $item->unit_price_cents) }}
+                                        {{ currency($item->quantity * $item->unit_price_cents) }}
                                     </td>
                                 </tr>
                             @endforeach
@@ -121,7 +121,7 @@
                                     Order Total:
                                 </td>
                                 <td class="px-6 py-4 whitespace-nowrap text-sm font-bold text-gray-900">
-                                    {{ format_yen($order->total_cents) }}
+                                    {{ currency($order->total_cents) }}
                                 </td>
                             </tr>
                         </tfoot>

@@ -26,7 +26,7 @@
                             <h1 class="text-3xl font-bold text-gray-900 mb-4">{{ $product->title }}</h1>
                             
                             <div class="text-4xl font-bold text-gray-900 mb-6">
-                                ¥{{ number_format($product->price_cents / 100) }}
+                                {{ currency($product->price_cents) }}
                                 <span class="text-lg font-normal text-gray-500">{{ strtoupper($product->currency) }}</span>
                             </div>
 
@@ -68,11 +68,11 @@
                                         @csrf
                                         <div class="flex space-x-4">
                                             <button type="submit" 
-                                                    class="flex-1 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg transition duration-200">
+                                                    class="flex-1 bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none text-white font-bold py-3 px-6 rounded-lg transition duration-200">
                                                 Add to Cart
                                             </button>
                                             <a href="{{ route('cart.index') }}" 
-                                               class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-200">
+                                               class="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-300 focus:outline-none text-gray-800 font-bold py-3 px-6 rounded-lg transition duration-200">
                                                 View Cart
                                             </a>
                                         </div>
@@ -82,11 +82,11 @@
                                         <p class="text-yellow-800 mb-3">Please log in to purchase this product.</p>
                                         <div class="flex space-x-4">
                                             <a href="{{ route('login') }}" 
-                                               class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                               class="bg-blue-600 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none text-white font-bold py-2 px-4 rounded transition-colors">
                                                 Log In
                                             </a>
                                             <a href="{{ route('register') }}" 
-                                               class="bg-gray-200 hover:bg-gray-300 text-gray-800 font-bold py-2 px-4 rounded">
+                                               class="bg-gray-200 hover:bg-gray-300 focus:ring-4 focus:ring-gray-300 focus:outline-none text-gray-800 font-bold py-2 px-4 rounded transition-colors">
                                                 Register
                                             </a>
                                         </div>
@@ -106,7 +106,7 @@
                                     </div>
                                     <div>
                                         <dt class="text-sm font-medium text-gray-500">Price</dt>
-                                        <dd class="text-sm text-gray-900">¥{{ number_format($product->price_cents / 100) }} {{ strtoupper($product->currency) }}</dd>
+                                        <dd class="text-sm text-gray-900">{{ currency($product->price_cents) }} {{ strtoupper($product->currency) }}</dd>
                                     </div>
                                     @if($product->files->count() > 0)
                                         <div>
@@ -171,7 +171,7 @@
                                         </p>
                                         <div class="flex justify-between items-center">
                                             <div class="text-lg font-bold text-gray-900">
-                                                ¥{{ number_format($relatedProduct->price_cents / 100) }}
+                                                {{ currency($relatedProduct->price_cents) }}
                                             </div>
                                             <a href="{{ route('products.show', $relatedProduct->slug) }}" 
                                                class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-1 px-3 rounded text-sm">

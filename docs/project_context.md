@@ -44,8 +44,10 @@ Clark English Learning (CEL) - A Laravel-based EFL teacher community site. Phase
 - 2025-09-27: Step 9 — Roles Model Converge (pivot-only) completed. Verified system already uses pivot table approach with no `users.role_id` column. Confirmed EnsureAdmin middleware, policies, and PromoteUserCommand all use pivot table. Successfully tested `migrate:fresh --seed` and `user:promote` command idempotency. Created PR `fix/step-9-roles-pivot-only`.
 - 2025-01-27: ✅ SEO System Implementation completed - Comprehensive SEO baseline established: Dynamic robots.txt with proper disallow rules (/admin/, /cart, /checkout, /account, /download), removed static robots.txt file, fixed SeoGuard middleware to set noindex meta tags before response generation, added article meta tags support to Meta service (article:published_time, article:author), updated PostController for blog post article meta tags, verified sitemap system working (pages, posts, products), confirmed account/download pages have noindex,nofollow meta tags; all 15 SEO tests passing. Created PR `feat/seo-robots-sitemap-meta`.
 
+# Progress
+- 2025-01-27: ✅ Step 11 — Stripe Idempotency completed - Verified comprehensive idempotency protection already implemented: CheckoutController@success and StripeController@handleCheckoutSessionCompleted both check order status before processing, GrantService::createForOrder() uses firstOrCreate() preventing duplicate grants, StripeEvent model provides webhook deduplication, and comprehensive test suite (StripeIdempotencyTest with 6 tests, 31 assertions) verifies replay protection for webhooks, checkout success page, and grant creation; fixed StripeWebhookTest by adding missing event IDs to all payloads for proper deduplication; all 13 Stripe tests passing
+
 # Pending
-- 2025-01-27: Step 11 — Stripe Idempotency Hardening - Prevent duplicate grants/emails on repeated success page hits or webhook replays by adding early returns for paid orders, ensuring GrantService idempotency, optional stripe_events table for webhook deduplication, and comprehensive testing for replay scenarios
 
 # Phase 1 Project Status: ✅ COMPLETE & PRODUCTION READY
 
@@ -81,6 +83,11 @@ Clark English Learning (CEL) Phase 1 is fully implemented and ready for producti
 3. Configure production environment variables
 4. Run final production tests
 
+# Progress
+- 2025-01-27: ✅ Step 12 — Docs Completion completed - Added comprehensive owner documentation: Created STRIPE_NOTES.md (env keys, test cards, webhook events, replay), ACCOUNT_AREA.md (dashboard, orders, downloads, ownership, rate-limits), SEO_GUIDE.md (meta tags, schema markup, Google validation), and updated README.md with links to all new documentation files. Branch: fix/step-12-docs pushed and ready for merge.
+- 2025-01-27: ✅ Step 13 — UX Improvements completed - Enhanced user experience across the application: Implemented visual empty states for /account/orders and /downloads with descriptive messaging and actionable CTAs, added post-purchase hint on checkout success page directing users to downloads, ensured flash messages render consistently in base layout (app.blade.php), created unified currency() helper function replacing all manual currency formatting (¥{{ number_format() }}) throughout views and services, verified all currency display uses consistent formatting; all UX improvements tested and working correctly. Branch: fix/step-13-ux-improvements ready for merge.
+
 # Pending
+- 2025-01-27: Step 14 — A11y & Perf touch-ups - Accessibility basics + small performance wins. Branch: fix/step-14-a11y-perf. Tasks: Verify alt text on all main images and semantic headings in blog/product views; ensure focus styles on buttons/links and label "Issue token" button for screen readers; confirm loading="lazy" on listing thumbnails and hero images; add cache headers via .htaccess for /public/build/* assets (1-year); take Lighthouse screenshots showing A11y ≥ 90 with note of .htaccess cache rule.
 - Deploy to production (GreenGeeks EcoSite Premium)
 - Post-deployment smoke testing and monitoring setup

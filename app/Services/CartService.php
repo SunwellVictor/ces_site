@@ -107,7 +107,7 @@ class CartService
      */
     public static function priceCentsToYen(int $cents): string
     {
-        return '¥' . number_format($cents / 100);
+        return currency($cents);
     }
 
     /**

@@ -95,18 +95,18 @@
 
                                         <div class="flex justify-between items-center">
                                             <div class="text-xl font-bold text-gray-900">
-                                                ¥{{ number_format($product->price_cents / 100) }}
+                                                {{ currency($product->price_cents) }}
                                             </div>
                                             <div class="flex space-x-2">
                                                 <a href="{{ route('products.show', $product->slug) }}" 
-                                                   class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded text-sm">
+                                                   class="bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none text-white font-bold py-2 px-4 rounded text-sm transition-colors">
                                                     View Details
                                                 </a>
                                                 @auth
                                                     <form action="{{ route('cart.add', $product) }}" method="POST" class="inline">
                                                         @csrf
                                                         <button type="submit" 
-                                                                class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded text-sm">
+                                                                class="bg-green-500 hover:bg-green-700 focus:ring-4 focus:ring-green-300 focus:outline-none text-white font-bold py-2 px-4 rounded text-sm transition-colors">
                                                             Add to Cart
                                                         </button>
                                                     </form>
@@ -129,13 +129,44 @@
                             {{ $products->withQueryString()->links() }}
                         </div>
                     @else
-                        <div class="text-center py-12">
-                            <div class="text-gray-500 text-lg">No products found.</div>
-                            @if(request()->hasAny(['search', 'type', 'min_price', 'max_price']))
-                                <a href="{{ route('products.index') }}" class="text-blue-500 hover:text-blue-700 mt-2 inline-block">
-                                    Clear filters to see all products
-                                </a>
-                            @endif
+                        <!-- Enhanced Empty State -->
+                        <div class="text-center py-16">
+                            <!-- Icon -->
+                            <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                                <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"></path>
+                                </svg>
+                            </div>
+                            
+                            <!-- Title and Message -->
+                            <h3 class="text-xl font-semibold text-gray-900 mb-3">
+                                @if(request()->hasAny(['search', 'type', 'min_price', 'max_price']))
+                                    No products match your criteria
+                                @else
+                                    No products available yet
+                                @endif
+                            </h3>
+                            
+                            <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                                @if(request()->hasAny(['search', 'type', 'min_price', 'max_price']))
+                                    We couldn't find any products matching your search criteria. Try adjusting your filters or browse all available products.
+                                @else
+                                    We're working on adding amazing products to our catalog. Check back soon for exciting new offerings!
+                                @endif
+                            </p>
+                            
+                            <!-- Action Buttons -->
+                            <div class="space-y-3">
+                                @if(request()->hasAny(['search', 'type', 'min_price', 'max_price']))
+                                    <a href="{{ route('products.index') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                                        View All Products
+                                    </a>
+                                @else
+                                    <a href="{{ route('blog.index') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                                        Read Our Blog
+                                    </a>
+                                @endif
+                            </div>
                         </div>
                     @endif
                 </div>

@@ -99,8 +99,8 @@
                                             {{ $order->orderItems->count() }} item(s)
                                         </td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
-                                            {{ format_yen($order->total_cents) }}
-                                        </td>
+                            {{ currency($order->total_cents) }}
+                        </td>
                                         <td class="px-6 py-4 whitespace-nowrap">
                                             <span class="inline-flex px-2 py-1 text-xs font-semibold rounded-full 
                                                 @if($order->status === 'completed') bg-green-100 text-green-800
@@ -126,17 +126,43 @@
                         {{ $orders->links() }}
                     </div>
                 @else
-                    <div class="text-center py-12">
-                        <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                        </svg>
-                        <h3 class="mt-2 text-sm font-medium text-gray-900">No orders found</h3>
-                        <p class="mt-1 text-sm text-gray-500">You haven't placed any orders yet.</p>
-                        <div class="mt-6">
-                            <a href="{{ route('products.index') }}" 
-                               class="inline-flex items-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700">
-                                Browse Products
-                            </a>
+                    <!-- Enhanced Empty State -->
+                    <div class="text-center py-16">
+                        <!-- Icon -->
+                        <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                            </svg>
+                        </div>
+                        
+                        <!-- Title and Message -->
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">
+                            @if(request()->hasAny(['status', 'from_date', 'to_date']))
+                                No orders match your filters
+                            @else
+                                No orders yet
+                            @endif
+                        </h3>
+                        
+                        <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                            @if(request()->hasAny(['status', 'from_date', 'to_date']))
+                                We couldn't find any orders matching your filter criteria. Try adjusting your filters or view all orders.
+                            @else
+                                You haven't placed any orders yet. Start shopping to see your order history here!
+                            @endif
+                        </p>
+                        
+                        <!-- Action Buttons -->
+                        <div class="space-y-3">
+                            @if(request()->hasAny(['status', 'from_date', 'to_date']))
+                                <a href="{{ route('account.orders') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                                    View All Orders
+                                </a>
+                            @else
+                                <a href="{{ route('products.index') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                                    Browse Products
+                                </a>
+                            @endif
                         </div>
                     </div>
                 @endif

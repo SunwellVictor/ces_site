@@ -10,7 +10,7 @@
     @if(empty($cartItems))
         <div class="text-center py-12">
             <p class="text-gray-600 text-lg mb-4">Your cart is empty</p>
-            <a href="{{ route('products.index') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+            <a href="{{ route('products.index') }}" class="bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none text-white font-bold py-2 px-4 rounded transition-colors">
                 Continue Shopping
             </a>
         </div>
@@ -33,13 +33,13 @@
                                 <div class="text-sm font-medium text-gray-900">{{ $item['title'] }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">¥{{ number_format($item['unit_price_cents'] / 100) }}</div>
+                                <div class="text-sm text-gray-900">{{ currency($item['unit_price_cents']) }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
                                 <div class="text-sm text-gray-900">{{ $item['qty'] }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap">
-                                <div class="text-sm text-gray-900">¥{{ number_format(($item['unit_price_cents'] * $item['qty']) / 100) }}</div>
+                                <div class="text-sm text-gray-900">{{ currency($item['unit_price_cents'] * $item['qty']) }}</div>
                             </td>
                             <td class="px-6 py-4 whitespace-nowrap text-sm font-medium">
                                 <form action="{{ route('cart.remove', $productId) }}" method="POST" class="inline">
@@ -56,18 +56,18 @@
             <div class="px-6 py-4 bg-gray-50">
                 <div class="flex justify-between items-center">
                     <div class="text-lg font-semibold">
-                        Total: ¥{{ number_format($cartTotal / 100) }}
+                        Total: {{ currency($cartTotal) }}
                     </div>
                     <div class="space-x-4">
-                        <a href="{{ route('products.index') }}" class="bg-gray-500 hover:bg-gray-700 text-white font-bold py-2 px-4 rounded">
+                        <a href="{{ route('products.index') }}" class="bg-gray-500 hover:bg-gray-700 focus:ring-4 focus:ring-gray-300 focus:outline-none text-white font-bold py-2 px-4 rounded transition-colors">
                             Continue Shopping
                         </a>
                         @auth
-                            <a href="{{ route('checkout.create') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            <a href="{{ route('checkout.create') }}" class="bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none text-white font-bold py-2 px-4 rounded transition-colors">
                                 Checkout
                             </a>
                         @else
-                            <a href="{{ route('login') }}" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                            <a href="{{ route('login') }}" class="bg-blue-500 hover:bg-blue-700 focus:ring-4 focus:ring-blue-300 focus:outline-none text-white font-bold py-2 px-4 rounded transition-colors">
                                 Login to Checkout
                             </a>
                         @endauth

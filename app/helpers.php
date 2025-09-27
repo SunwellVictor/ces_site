@@ -22,6 +22,28 @@ if (!function_exists('format_yen')) {
     }
 }
 
+if (!function_exists('currency')) {
+    /**
+     * Format a price in cents to currency format.
+     *
+     * @param int $cents
+     * @return string
+     */
+    function currency(int $cents): string
+    {
+        $amount = $cents / 100;
+        $isNegative = $amount < 0;
+        $absoluteAmount = abs($amount);
+        
+        // Use floor() to round down (10.5 -> 10, 10.9 -> 10)
+        $roundedAmount = floor($absoluteAmount);
+        
+        $formatted = '¥' . number_format($roundedAmount);
+        
+        return $isNegative ? '-' . $formatted : $formatted;
+    }
+}
+
 if (!function_exists('remaining_attempts')) {
     /**
      * Calculate remaining download attempts for a grant.

@@ -101,22 +101,45 @@
                     {{ $posts->appends(request()->query())->links() }}
                 </div>
             @else
-                <!-- No Posts Found -->
+                <!-- No Posts Found - Enhanced Empty State -->
                 <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                    <div class="p-6 text-center">
-                        <h3 class="text-lg font-medium text-gray-900 mb-2">No posts found</h3>
-                        <p class="text-gray-600">
+                    <div class="p-12 text-center">
+                        <!-- Icon -->
+                        <div class="mx-auto w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-6">
+                            <svg class="w-8 h-8 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+                            </svg>
+                        </div>
+                        
+                        <!-- Title and Message -->
+                        <h3 class="text-xl font-semibold text-gray-900 mb-3">
                             @if(request('search') || request('category'))
-                                Try adjusting your search criteria or browse all posts.
+                                No posts match your search
                             @else
-                                Check back later for new content!
+                                No blog posts yet
+                            @endif
+                        </h3>
+                        
+                        <p class="text-gray-600 mb-6 max-w-md mx-auto">
+                            @if(request('search') || request('category'))
+                                We couldn't find any posts matching your criteria. Try adjusting your search terms or browse all available content.
+                            @else
+                                Our blog is coming soon! We're working on creating valuable content for you. Check back later for updates and insights.
                             @endif
                         </p>
-                        @if(request('search') || request('category'))
-                            <a href="{{ route('blog.index') }}" class="mt-4 inline-block bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
-                                View All Posts
-                            </a>
-                        @endif
+                        
+                        <!-- Action Buttons -->
+                        <div class="space-y-3">
+                            @if(request('search') || request('category'))
+                                <a href="{{ route('blog.index') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                                    View All Posts
+                                </a>
+                            @else
+                                <a href="{{ route('products.index') }}" class="inline-block bg-blue-600 hover:bg-blue-700 text-white font-medium py-3 px-6 rounded-lg transition-colors">
+                                    Browse Products
+                                </a>
+                            @endif
+                        </div>
                     </div>
                 </div>
             @endif

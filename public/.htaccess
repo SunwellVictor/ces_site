@@ -1,3 +1,14 @@
+# Cache headers for static assets
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Cache build assets for 1 year
+    <FilesMatch "^build/.*\.(css|js|woff|woff2|ttf|eot|svg|png|jpg|jpeg|gif|ico)$">
+        ExpiresDefault "access plus 1 year"
+        Header set Cache-Control "public, immutable"
+    </FilesMatch>
+</IfModule>
+
 <IfModule mod_rewrite.c>
     <IfModule mod_negotiation.c>
         Options -MultiViews -Indexes
