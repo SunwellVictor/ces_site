@@ -201,7 +201,7 @@ class DownloadControllerTest extends TestCase
         $response->assertJson(['error' => 'Grant is no longer valid']);
     }
 
-    public function test_token_issuance_rate_limiting()
+    public function test_token_issuance_rate_limiting_per_grant()
     {
         $grant = DownloadGrant::factory()->create([
             'user_id' => $this->user->id,
@@ -211,18 +211,16 @@ class DownloadControllerTest extends TestCase
             'downloads_used' => 0
         ]);
 
-        // Make 5 requests (the limit) - our custom rate limiting allows 5 per minute
-        for ($i = 0; $i < 5; $i++) {
-            $response = $this->actingAs($this->user)
-                ->withSession(['_token' => 'test-token'])
-                ->post(route('downloads.token', $grant), [
-                    'grant_id' => $grant->id,
-                    '_token' => 'test-token'
-                ]);
-            $response->assertStatus(200);
-        }
+        // First request should succeed
+        $response = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->post(route('downloads.token', $grant), [
+                'grant_id' => $grant->id,
+                '_token' => 'test-token'
+            ]);
+        $response->assertStatus(200);
 
-        // 6th request should be rate limited by our custom rate limiting
+        // Second request to same grant should be rate limited (1 per minute per grant)
         $response = $this->actingAs($this->user)
             ->withSession(['_token' => 'test-token'])
             ->post(route('downloads.token', $grant), [
@@ -231,6 +229,66 @@ class DownloadControllerTest extends TestCase
             ]);
         
         $response->assertStatus(429); // Too Many Requests
+        $response->assertJson(['error' => 'Too many requests for this grant. Please try again later.']);
+    }
+
+    public function test_multiple_grants_can_be_accessed_simultaneously()
+    {
+        // Create a second file and product
+        $secondFile = File::factory()->create([
+            'disk' => 'local',
+            'original_name' => 'second-file.pdf',
+            'path' => 'files/second-file.pdf',
+            'size_bytes' => 2048
+        ]);
+        $secondProduct = Product::factory()->create([
+            'price_cents' => 2000,
+            'is_active' => true
+        ]);
+        $secondProduct->files()->attach($secondFile);
+
+        // Create grants for both files
+        $firstGrant = DownloadGrant::factory()->create([
+            'user_id' => $this->user->id,
+            'order_id' => $this->order->id,
+            'file_id' => $this->file->id,
+            'max_downloads' => 10,
+            'downloads_used' => 0
+        ]);
+
+        $secondGrant = DownloadGrant::factory()->create([
+            'user_id' => $this->user->id,
+            'order_id' => $this->order->id,
+            'file_id' => $secondFile->id,
+            'max_downloads' => 10,
+            'downloads_used' => 0
+        ]);
+
+        // Both grants should allow token generation in the same minute
+        $firstResponse = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->post(route('downloads.token', $firstGrant), [
+                'grant_id' => $firstGrant->id,
+                '_token' => 'test-token'
+            ]);
+        $firstResponse->assertStatus(200);
+
+        $secondResponse = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->post(route('downloads.token', $secondGrant), [
+                'grant_id' => $secondGrant->id,
+                '_token' => 'test-token'
+            ]);
+        $secondResponse->assertStatus(200);
+
+        // But second request to first grant should still be throttled
+        $thirdResponse = $this->actingAs($this->user)
+            ->withSession(['_token' => 'test-token'])
+            ->post(route('downloads.token', $firstGrant), [
+                'grant_id' => $firstGrant->id,
+                '_token' => 'test-token'
+            ]);
+        $thirdResponse->assertStatus(429);
     }
 
     public function test_download_token_consumption_works()

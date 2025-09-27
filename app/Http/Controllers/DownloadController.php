@@ -43,12 +43,12 @@ class DownloadController extends Controller
      */
     public function issueToken(Request $request, DownloadGrant $grant)
     {
-        // Rate limiting: 5 requests per minute per user
-        $key = 'download-token:' . Auth::id();
-        if (RateLimiter::tooManyAttempts($key, 5)) {
+        // Rate limiting: 1 request per minute per grant
+        $key = 'download:grant:' . $grant->id;
+        if (RateLimiter::tooManyAttempts($key, 1)) {
             $seconds = RateLimiter::availableIn($key);
             return response()->json([
-                'error' => 'Too many requests. Please try again later.',
+                'error' => 'Too many requests for this grant. Please try again later.',
                 'retry_after' => $seconds
             ], 429);
         }
