@@ -1,5 +1,8 @@
 name: CI
 
+# Step 19 - CI smoke pipeline to catch regressions on each PR
+# Runs: composer install, key generation, migrations, tests
+# Includes: Composer caching, MySQL service, artifact logging
 on:
   push:
     branches: [ main ]

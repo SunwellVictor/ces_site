@@ -94,5 +94,6 @@ Clark English Learning (CEL) Phase 1 is fully implemented and ready for producti
 - 2025-01-27: ✅ Step 18 — Per-grant throttle for download tokens completed - Enhanced download token throttling from per-user to per-grant granularity: Verified DownloadController already implements correct per-grant throttling using 'download:grant:{grant_id}' rate limiter key with 1 request per 60 seconds per grant, confirmed all 18 DownloadControllerTest tests pass including 'token issuance rate limiting per grant' and 'multiple grants can be accessed simultaneously', performed comprehensive manual testing verifying same grant is throttled within 60 seconds while different grants succeed independently, no code changes required as implementation was already correct. Branch: feat/step-18-download-throttle-per-grant
 
 # Pending
+- 2025-01-27: Step 19 — CI smoke (so regressions get caught) - Run a tiny CI pipeline on each PR with composer install, key generation, migrations, and tests; cache Composer between runs; verify CI green on test PR with badge showing on repo
 - Deploy to production (GreenGeeks EcoSite Premium)
 - Post-deployment smoke testing and monitoring setup
