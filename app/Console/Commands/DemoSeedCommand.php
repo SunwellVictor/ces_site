@@ -18,7 +18,10 @@ class DemoSeedCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'demo:seed {--user-email=demo@example.com : Email of user to grant downloads to}';
+    protected $signature = 'demo:seed 
+                            {--user-email=demo@example.com : Email of user to grant downloads to}
+                            {--force : Force execution on production environment}
+                            {--show-password : Show password in plain text instead of masking}';
 
     /**
      * The console command description.
@@ -32,6 +35,14 @@ class DemoSeedCommand extends Command
      */
     public function handle()
     {
+        // Production safety check
+        if (!$this->checkProductionSafety()) {
+            return Command::FAILURE;
+        }
+
+        // Show environment warning
+        $this->showEnvironmentWarning();
+
         $this->info('🌱 Creating demo content...');
 
         // Get or create demo user
@@ -68,6 +79,60 @@ class DemoSeedCommand extends Command
         $this->printQAUrls($categories, $posts, $products);
 
         return Command::SUCCESS;
+    }
+
+    /**
+     * Check if it's safe to run on production environment
+     */
+    private function checkProductionSafety(): bool
+    {
+        $environment = app()->environment();
+        
+        // Allow on non-production environments
+        if (!app()->environment('production')) {
+            return true;
+        }
+
+        // On production, require --force flag
+        if (!$this->option('force')) {
+            $this->error('🚫 Demo seeder is blocked on production environment!');
+            $this->line('   This command creates test data that should not exist in production.');
+            $this->line('   If you really need to run this, use: <fg=yellow>--force</fg=yellow>');
+            $this->newLine();
+            $this->line('   Current environment: <fg=red>production</fg=red>');
+            $this->line('   Current URL: <fg=red>' . config('app.url') . '</fg=red>');
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * Show environment warning before proceeding
+     */
+    private function showEnvironmentWarning(): void
+    {
+        $environment = app()->environment();
+        $url = config('app.url');
+        
+        $this->newLine();
+        $this->line('🌍 <fg=yellow>Environment Information:</fg=yellow>');
+        $this->line("   APP_ENV: <fg=cyan>{$environment}</fg=cyan>");
+        $this->line("   APP_URL: <fg=cyan>{$url}</fg=cyan>");
+        
+        if (app()->environment('production')) {
+            $this->line('   <fg=red>⚠️  WARNING: Running on PRODUCTION environment!</fg=red>');
+        }
+        
+        $this->newLine();
+        
+        // Give user a chance to cancel on production
+        if (app()->environment('production')) {
+            if (!$this->confirm('Are you sure you want to create demo data on production?', false)) {
+                $this->info('Demo seeding cancelled.');
+                exit(Command::FAILURE);
+            }
+        }
     }
 
     private function createCategories(): array
@@ -274,7 +339,13 @@ class DemoSeedCommand extends Command
         // Demo user info
         $this->line('<fg=yellow>👤 Demo User Credentials:</>');
         $this->line("   Email: {$this->option('user-email')}");
-        $this->line("   Password: password");
+        
+        // Mask password unless --show-password is used
+        if ($this->option('show-password')) {
+            $this->line("   Password: password");
+        } else {
+            $this->line("   Password: ********");
+        }
         $this->newLine();
 
         $this->info('💡 Tip: Login with the demo user to test downloads and account features!');
