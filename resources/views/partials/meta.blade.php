@@ -40,3 +40,12 @@
         @endif
     @endforeach
 @endif
+
+{{-- Article Meta Tags --}}
+@if($meta['article'])
+    @foreach($meta['article'] as $property => $content)
+        @if($content)
+<meta property="article:{{ $property }}" content="{{ $content }}">
+        @endif
+    @endforeach
+@endif

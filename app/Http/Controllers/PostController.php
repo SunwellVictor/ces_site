@@ -94,6 +94,10 @@ class PostController extends Controller
                  'description' => $description,
                  'url' => $canonical,
              ])
+             ->article([
+                 'published_time' => $post->published_at->toISOString(),
+                 'author' => $post->author->name,
+             ])
              ->twitter([
                  'card' => 'summary_large_image',
                  'title' => $title,

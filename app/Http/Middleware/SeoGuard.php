@@ -34,17 +34,13 @@ class SeoGuard
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $response = $next($request);
-
-        // Only apply SEO guards to HTML responses
-        if (!$this->isHtmlResponse($response)) {
-            return $response;
-        }
-
         // Check if this is a private route that should be noindexed
+        // We need to do this BEFORE generating the response so the meta tags are available during view rendering
         if ($this->isPrivateRoute($request)) {
             $this->addNoindexMeta();
         }
+
+        $response = $next($request);
 
         return $response;
     }

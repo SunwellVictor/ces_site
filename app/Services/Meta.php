@@ -10,6 +10,7 @@ class Meta
         'canonical' => '',
         'og' => [],
         'twitter' => [],
+        'article' => [],
         'noindex' => false,
         'robots' => '',
     ];
@@ -56,6 +57,15 @@ class Meta
     public function twitter(array $kv): self
     {
         $this->data['twitter'] = array_merge($this->data['twitter'], $kv);
+        return $this;
+    }
+
+    /**
+     * Set article meta tags
+     */
+    public function article(array $kv): self
+    {
+        $this->data['article'] = array_merge($this->data['article'], $kv);
         return $this;
     }
 
@@ -118,6 +128,14 @@ class Meta
     }
 
     /**
+     * Get article data
+     */
+    public function getArticle(): array
+    {
+        return $this->data['article'];
+    }
+
+    /**
      * Check if page should be noindexed
      */
     public function isNoindex(): bool
@@ -159,6 +177,7 @@ class Meta
             'canonical' => $this->getCanonical(),
             'og' => $og,
             'twitter' => $twitter,
+            'article' => $this->getArticle(),
             'noindex' => $this->isNoindex(),
             'robots' => $this->getRobots(),
         ];
@@ -175,6 +194,7 @@ class Meta
             'canonical' => '',
             'og' => [],
             'twitter' => [],
+            'article' => [],
             'noindex' => false,
             'robots' => '',
         ];
