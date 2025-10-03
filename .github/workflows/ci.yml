@@ -67,14 +67,14 @@ jobs:
 
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       run: |
-        if [ -f artisan ]; then
-          php artisan test --colors=never
-        elif [ -f vendor/bin/phpunit ]; then
+        if [ -f vendor/bin/phpunit ]; then
           vendor/bin/phpunit --colors=never
         else
-          echo "No test runner found; skipping tests."
+          php -v || true
+          ls -la vendor || true
+          echo "PHPUnit not found; attempting artisan test"
+          php artisan test --colors=never
         fi
-      working-directory: ${{ github.workspace }}
 
     - name: Upload logs on failure
       if: failure()
