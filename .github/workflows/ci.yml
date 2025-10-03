@@ -51,14 +51,16 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-php-
 
-    - name: Install dependencies
+    - name: Install dependencies (no scripts)
+      env:
+        COMPOSER_NO_INTERACTION: 1
+        COMPOSER_DISCARD_CHANGES: 1
       run: |
         if [ -f composer.json ]; then
-          composer install --no-interaction --prefer-dist --optimize-autoloader
+          composer install --no-interaction --prefer-dist --optimize-autoloader --no-scripts
         else
           echo "composer.json not found; skipping composer install."
         fi
-      working-directory: ${{ github.workspace }}
 
     - name: Directory Permissions
       run: |
