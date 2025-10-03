@@ -6,12 +6,18 @@ on:
   pull_request_target:
     branches: [ main ]
 
+defaults:
+  run:
+    working-directory: ${{ github.workspace }}
+
 jobs:
   test:
     runs-on: ubuntu-latest
 
     steps:
     - uses: actions/checkout@v4
+      with:
+        path: .
 
     - name: Setup PHP
       uses: shivammathur/setup-php@v2
@@ -48,12 +54,14 @@ jobs:
 
     - name: Install dependencies
       run: composer install --no-interaction --prefer-dist --optimize-autoloader
+      working-directory: ${{ github.workspace }}
 
     - name: Directory Permissions
       run: chmod -R 777 storage bootstrap/cache
 
     - name: Execute tests (Unit and Feature tests) via PHPUnit
       run: php artisan test --colors=never
+      working-directory: ${{ github.workspace }}
 
     - name: Upload logs on failure
       if: failure()
