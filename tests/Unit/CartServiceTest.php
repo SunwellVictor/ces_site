@@ -73,7 +73,7 @@ class CartServiceTest extends TestCase
 
     public function test_can_clear_entire_cart()
     {
-        $product2 = Product::factory()->create(['price_cents' => 2000]);
+        $product2 = Product::factory()->create(['price_cents' => 2000, 'is_active' => true]);
         
         CartService::add($this->product->id, 1);
         CartService::add($product2->id, 2);
@@ -87,7 +87,7 @@ class CartServiceTest extends TestCase
 
     public function test_can_count_total_items_in_cart()
     {
-        $product2 = Product::factory()->create(['price_cents' => 2000]);
+        $product2 = Product::factory()->create(['price_cents' => 2000, 'is_active' => true]);
         
         CartService::add($this->product->id, 2);
         CartService::add($product2->id, 3);
@@ -108,7 +108,7 @@ class CartServiceTest extends TestCase
 
     public function test_can_calculate_total_cart_value()
     {
-        $product2 = Product::factory()->create(['price_cents' => 2000]);
+        $product2 = Product::factory()->create(['price_cents' => 2000, 'is_active' => true]);
         
         CartService::add($this->product->id, 2); // 2 * 1000 = 2000
         CartService::add($product2->id, 1);      // 1 * 2000 = 2000
