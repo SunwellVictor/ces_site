@@ -34,7 +34,7 @@ class ProductTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertSee('Test Product');
-        $response->assertSee('¥1,000');
+        $response->assertSee('¥10');
     }
 
     /** @test */
@@ -53,7 +53,7 @@ class ProductTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Test Product');
         $response->assertSee('This is a test product');
-        $response->assertSee('¥1,500');
+        $response->assertSee('¥15');
     }
 
     /** @test */
@@ -115,12 +115,12 @@ class ProductTest extends TestCase
         Product::factory()->create([
             'is_active' => true,
             'title' => 'Cheap Product',
-            'price_cents' => 500,
+            'price_cents' => 50000, // ¥500
         ]);
         Product::factory()->create([
             'is_active' => true,
             'title' => 'Expensive Product',
-            'price_cents' => 5000,
+            'price_cents' => 200000, // ¥2000
         ]);
 
         $response = $this->get('/products?min_price=1000&max_price=10000');
@@ -153,7 +153,7 @@ class ProductTest extends TestCase
         $productData = [
             'title' => 'New Product',
             'description' => 'Product description',
-            'price_cents' => 2000,
+            'price_yen' => 20,
             'currency' => 'JPY',
             'is_digital' => true,
             'is_active' => true,
@@ -179,7 +179,7 @@ class ProductTest extends TestCase
         $updateData = [
             'title' => 'Updated Title',
             'description' => $product->description,
-            'price_cents' => $product->price_cents,
+            'price_yen' => $product->price_cents / 100, // Convert cents to yen
             'currency' => $product->currency,
             'is_active' => $product->is_active,
             'is_digital' => $product->is_digital,
@@ -217,8 +217,8 @@ class ProductTest extends TestCase
         $product = Product::factory()->create();
         $file = File::factory()->create();
 
-        $response = $this->actingAs($admin)->post("/admin/products/{$product->id}/files", [
-            'file_id' => $file->id,
+        $response = $this->actingAs($admin)->post("/admin/products/{$product->id}/attach-files", [
+            'files' => [$file->id],
         ]);
 
         $response->assertRedirect();

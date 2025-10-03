@@ -43,7 +43,7 @@ class DownloadGrantTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('Test Product');
         $response->assertSee('test-file.pdf');
-        $response->assertSee('3 remaining'); // 5 - 2 = 3
+        $response->assertSee('3 of 5 downloads remaining'); // 5 - 2 = 3
     }
 
     /** @test */
