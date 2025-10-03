@@ -8,6 +8,8 @@ Clark English Learning (CEL) – Phase 1. A Laravel 10 app providing course cata
 
 # Progress
 - 2025-10-03: CI workflow prepared on branch fix/ci-sqlite (SQLite test DB, APP_KEY generation without artisan, CACHE_DRIVER corrected, actions/upload-artifact migrated to v4)
+- 2025-10-03: Resolved PR conflicts by taking main versions of ci.yml and project_context.md; retriggered CI on feat/phase-1-release
+- 2025-10-03: Enforced CI working-directory to repo root via defaults.run and explicit working-directory on composer/test steps; pushed to feat/phase-1-release to retrigger checks
 
 # Pending
-- 2025-10-03: CI PR (fix/ci-sqlite → main) needs merging so Phase 1 PR checks use updated workflow; owner: assistant; next step: merge CI fix into main, then re-run Phase 1 PR checks and proceed to squash-merge when green
+- 2025-10-03: Verify PR checks (pull_request_target) now pass; owner: assistant; next step: squash-merge and run post-deploy smoke
