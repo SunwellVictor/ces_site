@@ -66,22 +66,28 @@ jobs:
         if [ -d bootstrap/cache ]; then chmod -R 777 bootstrap/cache; fi
 
     - name: Execute tests (Unit and Feature tests) via PHPUnit
+      id: run-tests
       run: |
+        EXIT_CODE=0
         if [ -f vendor/bin/phpunit ]; then
-          vendor/bin/phpunit --colors=never
+          vendor/bin/phpunit --colors=never --log-junit junit.xml | tee phpunit.out || EXIT_CODE=$?
         else
-          php -v || true
-          ls -la vendor || true
-          echo "PHPUnit not found; attempting artisan test"
-          php artisan test --colors=never
+          echo "PHPUnit not found; attempting artisan test" | tee phpunit.out
+          php artisan test --colors=never | tee -a phpunit.out || EXIT_CODE=$?
         fi
+        echo "exit_code=$EXIT_CODE" >> "$GITHUB_OUTPUT"
 
-    - name: Upload logs on failure
-      if: failure()
+    - name: Upload test artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: laravel-logs
+        name: test-artifacts
         path: |
+          junit.xml
+          phpunit.out
           storage/logs/
           bootstrap/cache/
-        retention-days: 5
+        retention-days: 3
+
+    - name: Fail if tests failed
+      if: steps.run-tests.outputs.exit_code != '0'
+      run: exit 1
