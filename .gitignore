@@ -21,3 +21,6 @@ yarn-error.log
 /.nova
 /.vscode
 /.zed
+
+# Ignore deploy vendor
+ces_production_deploy/vendor/
