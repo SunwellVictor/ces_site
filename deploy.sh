@@ -22,11 +22,23 @@ cp -r resources $DEPLOY_DIR/
 cp -r routes $DEPLOY_DIR/
 cp -r storage $DEPLOY_DIR/
 
-# Copy root files
+# Root files
 cp artisan $DEPLOY_DIR/
 cp composer.json $DEPLOY_DIR/
 cp composer.lock $DEPLOY_DIR/
-cp .env.production $DEPLOY_DIR/.env.example
+- cp .env.production $DEPLOY_DIR/.env.example
++ cp .env.example $DEPLOY_DIR/.env.example
+
+# Build frontend assets before packaging (if npm is available)
++ if command -v npm >/dev/null 2>&1 && [ -f package.json ]; then
++   echo "🧱 Building frontend assets..."
++   if [ ! -d node_modules ]; then
++     npm ci --silent || npm install --silent
++   fi
++   npm run build
++ else
++   echo "⚠️ Skipping asset build: npm not found or package.json missing."
++ fi
 
 # Copy vendor directory (production optimized)
 cp -r vendor $DEPLOY_DIR/
